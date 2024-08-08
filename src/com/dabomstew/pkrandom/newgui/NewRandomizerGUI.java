@@ -146,6 +146,7 @@ public class NewRandomizerGUI {
     private JRadioButton wpRandomRadioButton;
     private JRadioButton wpArea1To1RadioButton;
     private JRadioButton wpGlobal1To1RadioButton;
+    private JRadioButton wpGlobalAdditionSelectionMode;
     private JRadioButton wpARNoneRadioButton;
     private JRadioButton wpARSimilarStrengthRadioButton;
     private JRadioButton wpARCatchEmAllModeRadioButton;
@@ -342,7 +343,7 @@ public class NewRandomizerGUI {
     private List<String> trainerSettings = new ArrayList<>();
     private List<String> trainerSettingToolTips = new ArrayList<>();
     private final int TRAINER_UNCHANGED = 0, TRAINER_RANDOM = 1, TRAINER_RANDOM_EVEN = 2, TRAINER_RANDOM_EVEN_MAIN = 3,
-                        TRAINER_TYPE_THEMED = 4, TRAINER_TYPE_THEMED_ELITE4_GYMS = 5;
+            TRAINER_TYPE_THEMED = 4, TRAINER_TYPE_THEMED_ELITE4_GYMS = 5;
 
     private BatchRandomizationSettings batchRandomizationSettings;
 
@@ -448,6 +449,7 @@ public class NewRandomizerGUI {
         wpRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
         wpArea1To1RadioButton.addActionListener(e -> enableOrDisableSubControls());
         wpGlobal1To1RadioButton.addActionListener(e -> enableOrDisableSubControls());
+        wpGlobalAdditionSelectionMode.addActionListener(e -> enableOrDisableSubControls());
         wpSetMinimumCatchRateCheckBox.addActionListener(e -> enableOrDisableSubControls());
         wpRandomizeHeldItemsCheckBox.addActionListener(e -> enableOrDisableSubControls());
         wpPercentageLevelModifierCheckBox.addActionListener(e -> enableOrDisableSubControls());
@@ -1590,6 +1592,7 @@ public class NewRandomizerGUI {
         wpARTypeThemeAreasRadioButton
                 .setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS);
         wpGlobal1To1RadioButton.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.GLOBAL_MAPPING);
+        wpGlobalAdditionSelectionMode.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.ADDITIONSELECTIONMODE);
         wpRandomRadioButton.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.RANDOM);
         wpUnchangedRadioButton.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED);
         wpUseTimeBasedEncountersCheckBox.setSelected(settings.isUseTimeBasedEncounters());
@@ -1814,7 +1817,7 @@ public class NewRandomizerGUI {
         settings.setTotemLevelModifier(totpPercentageLevelModifierSlider.getValue());
 
         settings.setWildPokemonMod(wpUnchangedRadioButton.isSelected(), wpRandomRadioButton.isSelected(), wpArea1To1RadioButton.isSelected(),
-                wpGlobal1To1RadioButton.isSelected());
+                wpGlobal1To1RadioButton.isSelected(), wpGlobalAdditionSelectionMode.isSelected());
         settings.setWildPokemonRestrictionMod(wpARNoneRadioButton.isSelected(), wpARSimilarStrengthRadioButton.isSelected(),
                 wpARCatchEmAllModeRadioButton.isSelected(), wpARTypeThemeAreasRadioButton.isSelected());
         settings.setUseTimeBasedEncounters(wpUseTimeBasedEncountersCheckBox.isSelected());
@@ -2905,6 +2908,7 @@ public class NewRandomizerGUI {
             wpRandomRadioButton.setEnabled(true);
             wpArea1To1RadioButton.setEnabled(true);
             wpGlobal1To1RadioButton.setEnabled(true);
+            wpGlobalAdditionSelectionMode.setEnabled(true);
 
             wpARNoneRadioButton.setSelected(true);
 

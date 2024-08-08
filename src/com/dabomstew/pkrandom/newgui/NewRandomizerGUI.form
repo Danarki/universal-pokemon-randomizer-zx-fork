@@ -2244,17 +2244,6 @@
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpArea1To1RadioButton.toolTipText"/>
                     </properties>
                   </component>
-                  <component id="44917" class="javax.swing.JRadioButton" binding="wpGlobal1To1RadioButton">
-                    <constraints>
-                      <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                      <gridbag weightx="0.0" weighty="0.0"/>
-                    </constraints>
-                    <properties>
-                      <enabled value="false"/>
-                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpGlobal1To1RadioButton.text"/>
-                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpGlobal1To1RadioButton.toolTipText"/>
-                    </properties>
-                  </component>
                   <grid id="ff19e" layout-manager="GridBagLayout">
                     <constraints>
                       <grid row="1" column="2" row-span="6" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -2446,6 +2435,28 @@
                       <enabled value="false"/>
                       <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpAllowAltFormesCheckBox.text"/>
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpAllowAltFormesCheckBox.toolTipText"/>
+                    </properties>
+                  </component>
+                  <component id="d9cc4" class="javax.swing.JRadioButton" binding="wpGlobal1To1RadioButton">
+                    <constraints>
+                      <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpGlobal1To1RadioButton.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpGlobal1To1RadioButton.toolTipText"/>
+                    </properties>
+                  </component>
+                  <component id="717e4" class="javax.swing.JRadioButton" binding="wpGlobalAdditionSelectionMode">
+                    <constraints>
+                      <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpGlobalAdditionSelectionMode.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpGlobal1To1RadioButton.toolTipText"/>
                     </properties>
                   </component>
                 </children>
@@ -3859,6 +3870,8 @@
       <member id="17061"/>
       <member id="4abec"/>
       <member id="44917"/>
+      <member id="717e4"/>
+      <member id="d9cc4"/>
     </group>
     <group name="wildPokemonAdditionalButtonGroup">
       <member id="6fd8b"/>

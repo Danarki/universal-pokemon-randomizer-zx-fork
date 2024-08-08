@@ -698,12 +698,43 @@ public abstract class AbstractRomHandler implements RomHandler {
         return newAbility;
     }
 
+    public int getPokemonStage(Pokemon pokemon) {
+        int stage = 1;
+
+        if (!pokemon.evolutionsFrom.isEmpty() && !pokemon.evolutionsTo.isEmpty()) {
+            stage = 2;
+        } else {
+            if (!pokemon.evolutionsTo.isEmpty() && pokemon.evolutionsTo.get(0).from != pokemon) {
+                stage++;
+                Pokemon fromMon = pokemon.evolutionsTo.get(0).from;
+                if (!fromMon.evolutionsTo.isEmpty() && fromMon.evolutionsTo.get(0).from != fromMon) {
+                    stage = 3;
+                }
+            } else {
+                if (!pokemon.evolutionsFrom.isEmpty() && pokemon.evolutionsFrom.get(0).from != pokemon) {
+                    stage++;
+                    if (!pokemon.evolutionsFrom.get(0).to.evolutionsFrom.isEmpty()) {
+                        stage++;
+                    }
+                }
+            }
+        }
+
+        return stage;
+    }
+
+    public class PairList {
+        private Type type;
+        private Pokemon pokemon;
+    }
+
     @Override
     public void randomEncounters(Settings settings) {
         boolean useTimeOfDay = settings.isUseTimeBasedEncounters();
         boolean catchEmAll = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL;
         boolean typeThemed = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS;
         boolean usePowerLevels = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH;
+        boolean AdditionSelectionMode = settings.getWildPokemonMod() == Settings.WildPokemonMod.ADDITIONSELECTIONMODE;
         boolean noLegendaries = settings.isBlockWildLegendaries();
         boolean balanceShakingGrass = settings.isBalanceShakingGrass();
         int levelModifier = settings.isWildLevelsModified() ? settings.getWildLevelModifier() : 0;
@@ -737,6 +768,265 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         if (banIrregularAltFormes) {
             banned.addAll(getIrregularFormes());
+        }
+
+        if (AdditionSelectionMode) {
+            // Initialize maps for primary and secondary types
+            Map<Type, List<Pokemon>> primaryTypedList = new HashMap<>();
+            Map<Type, List<Pokemon>> secondaryTypedList = new HashMap<>();
+
+            // Fill both lists with the needed pokemons.
+            // Example Geodude has 2 types Rock and Ground
+            // Geodude will be added to both maps, Rock primary and Ground secondary
+            for (Pokemon p : mainPokemonListInclFormes) {
+                // Get the list of pokemons that have the primary type
+                List<Pokemon> pList = primaryTypedList.get(p.primaryType);
+
+                // List for type is still empty, so needs a new list
+                if (pList == null) {
+                    pList = new ArrayList<>();
+                }
+
+                // Add the pokemon to the list and add it to the primary list
+                pList.add(p);
+
+                primaryTypedList.put(p.primaryType, pList);
+
+                // Pokemon has a secondary type, so do the same
+                if (p.secondaryType != null) {
+                    pList = secondaryTypedList.get(p.secondaryType);
+
+                    if (pList == null) {
+                        pList = new ArrayList<>();
+                    }
+
+                    pList.add(p);
+
+                    secondaryTypedList.put(p.secondaryType, pList);
+                }
+            }
+
+            // Boolean used for keeping track if all pokemon have been added
+            boolean allHasBeenAdded = false;
+
+            for (EncounterSet area : scrambledEncounters) {
+                ArrayList<Encounter> newEncs = new ArrayList<>();
+
+                // lists for keeping track of double pokemon that need to be replaced, and indexes that will be replaced
+                List<Integer> doubles = new ArrayList<>();
+                List<Integer> indexes = new ArrayList<>();
+
+                boolean legendaryAdded = false;
+                int index = -1;
+
+                for (Encounter enc : area.encounters) {
+                    index++;
+                    // Check if the pokemon to be changed is in the banned list, so dont change it
+                    if (banned.contains(enc.pokemon)) {
+                        continue;
+                    }
+
+                    // Check if the pokemon has been in this pool yet. Don't change it if it hasnt been
+                    if (!doubles.contains(enc.pokemon.number)) {
+                        doubles.add(enc.pokemon.number);
+                        continue;
+                    }
+
+                    // this index will be changed, so add it to the list
+                    indexes.add(index);
+
+                    boolean found = false;
+                    Pokemon replaceMon = enc.pokemon;
+                    int stage = getPokemonStage(replaceMon);
+                    int attempts = 0;
+                    int maxAttempts = 20;
+
+                    while (!found) {
+                        boolean resetList = true;
+
+                        for (Type type : Type.getAllTypes(3)) {
+                            if (primaryTypedList.get(type) != null && !primaryTypedList.get(type).isEmpty()) {
+                                // Set flags to reset and no longer need to remove pokemons from lists
+                                resetList = false;
+                                allHasBeenAdded = true;
+                                break;
+                            }
+                        }
+
+                        // Reset the list in the same way as above
+                        if (resetList) {
+                            primaryTypedList = new HashMap<>();
+                            secondaryTypedList = new HashMap<>();
+
+                            for (Pokemon p : mainPokemonListInclFormes) {
+                                List<Pokemon> pList = primaryTypedList.get(p.primaryType);
+
+                                if (pList == null) {
+                                    pList = new ArrayList<>();
+                                }
+
+                                pList.add(p);
+
+                                primaryTypedList.put(p.primaryType, pList);
+
+                                if (p.secondaryType != null) {
+                                    pList = secondaryTypedList.get(p.secondaryType);
+
+                                    if (pList == null) {
+                                        pList = new ArrayList<>();
+                                    }
+
+                                    pList.add(p);
+
+                                    secondaryTypedList.put(p.secondaryType, pList);
+                                }
+                            }
+                        }
+
+                        // Get the primary type and get the options
+                        Type checkType = replaceMon.primaryType;
+                        List<Pokemon> pickables = primaryTypedList.get(checkType);
+                        int size = pickables.size();
+
+                        // check if there are options, if not check the secondary type to the primary type list
+                        // if no options again, primary to secondary list
+                        // if no options yet again, check secondary to secondary list,
+                        // still no options? just grab a random pokemon and use it
+                        if (size == 0) {
+                            checkType = replaceMon.secondaryType;
+
+                            pickables = primaryTypedList.get(checkType) != null ? primaryTypedList.get(checkType) : new ArrayList<>();
+
+                            size = pickables.size();
+
+                            if (size == 0) {
+                                checkType = replaceMon.primaryType;
+                                pickables = secondaryTypedList.get(checkType) != null ? secondaryTypedList.get(checkType) : new ArrayList<>();
+                                size = pickables.size();
+
+                                if (size == 0) {
+                                    checkType = replaceMon.secondaryType;
+                                    pickables = secondaryTypedList.get(checkType) != null ? secondaryTypedList.get(checkType) : new ArrayList<>();
+                                    size = pickables.size();
+
+                                    if (size == 0) {
+                                        List<Type> allTypes = Type.getAllTypes(3);
+                                        int typeSize = allTypes.size();
+                                        int randType = this.random.nextInt(typeSize);
+                                        Type pickedType = allTypes.get(randType);
+
+                                        // while the options list has nothing in it, keep trying till one is found
+                                        while (primaryTypedList.get(pickedType) == null || primaryTypedList.get(pickedType).size() == 0) {
+                                            typeSize = allTypes.size();
+                                            randType = this.random.nextInt(typeSize);
+                                            pickedType = allTypes.get(randType);
+                                        }
+
+                                        List<Pokemon> pickList = primaryTypedList.get(pickedType);
+                                        int listSize = pickList.size();
+                                        int randPick = this.random.nextInt(listSize);
+
+                                        List<Pokemon> p = new ArrayList<>();
+                                        p.add(pickList.get(randPick));
+                                        size = 1;
+                                        pickables = p;
+                                    }
+                                }
+                            }
+                        }
+
+                        attempts++;
+                        int stageSelectTries = 0;
+                        int stageSelectMaxTries = 5;
+                        int picked = 0;
+                        Pokemon pickedMon = null;
+
+                        // Search the list x amount of times until a pokemon with the same stage is found
+                        while (stageSelectTries <= stageSelectMaxTries) {
+                            picked = this.random.nextInt(size);
+                            pickedMon = pickables.get(picked);
+                            int pickedStage = getPokemonStage(pickedMon);
+
+                            if (stage == pickedStage){
+                                break;
+                            }
+
+                            stageSelectTries++;
+                        }
+
+                        // check if a pokemon was picked
+                        if (pickedMon != null) {
+                            boolean skipFlag = false;
+                            boolean increaseLevels = false;
+
+                            // check if the pokemon is a legendary
+                            if (onlyLegendaryList.contains(pickedMon)) {
+                                // check if a legendary was added yet, there are multiple options and max attempts isnt reached yet
+                                if (legendaryAdded && pickables.size() > 1 && attempts < maxAttempts) {
+                                    skipFlag = true;
+                                } else {
+                                    legendaryAdded = true;
+                                    increaseLevels = true;
+                                }
+                            }
+
+                            // Check if we dont need to skip the pokemon
+                            if (!skipFlag) {
+                                // arrange a new encounter
+                                Encounter newenc = new Encounter();
+                                newenc.pokemon = pickedMon;
+
+                                int minLevel = enc.level;
+                                int maxLevel = enc.maxLevel;
+
+                                // if it's a legendary pokemon we will need to increase the amount of levels by a bit
+                                // minimum of level 30, max of 100
+                                if (increaseLevels) {
+                                    minLevel = (int) (minLevel * 1.25);
+                                    if (minLevel > 100)
+                                        minLevel = 100;
+
+                                    if (minLevel < 30) {
+                                        minLevel = 30;
+                                        maxLevel = 50;
+                                    } else {
+                                        maxLevel = (int) (maxLevel * 1.5);
+
+                                        if (maxLevel > 100)
+                                            maxLevel = 100;
+                                    }
+                                }
+
+                                newenc.level = minLevel;
+                                newenc.maxLevel = maxLevel;
+
+                                setFormeForEncounter(newenc, newenc.pokemon);
+
+                                newEncs.add(newenc);
+
+                                // if a complete loop through all options has been done, don't delete any options anymore
+                                if (!allHasBeenAdded) {
+                                    if (primaryTypedList.get(pickedMon.primaryType) != null)
+                                        primaryTypedList.get(pickedMon.primaryType).remove(pickedMon);
+
+
+                                    if (secondaryTypedList.get(pickedMon.secondaryType) != null)
+                                        secondaryTypedList.get(pickedMon.secondaryType).remove(pickedMon);
+                                }
+
+                                found = true;
+                            }
+                        }
+                    }
+                }
+
+                for (Encounter newEnc : newEncs) {
+                    Integer index2 = indexes.get(0);
+                    indexes.remove(0);
+
+                    area.encounters.set(index2, newEnc);
+                }
+            }
         }
         // Assume EITHER catch em all OR type themed OR match strength for now
         if (catchEmAll) {

@@ -573,6 +573,10 @@ public class Randomizer {
         }
 
         switch (settings.getWildPokemonMod()) {
+            case ADDITIONSELECTIONMODE:
+                romHandler.randomEncounters(settings);
+                wildsChanged = true;
+                break;
             case RANDOM:
                 romHandler.randomEncounters(settings);
                 wildsChanged = true;

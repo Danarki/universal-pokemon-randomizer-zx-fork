@@ -192,7 +192,7 @@ public class Settings {
     private boolean betterTrainerMovesets;
 
     public enum WildPokemonMod {
-        UNCHANGED, RANDOM, AREA_MAPPING, GLOBAL_MAPPING
+        UNCHANGED, RANDOM, AREA_MAPPING, GLOBAL_MAPPING, ADDITIONSELECTIONMODE
     }
 
     public enum WildPokemonRestrictionMod {
