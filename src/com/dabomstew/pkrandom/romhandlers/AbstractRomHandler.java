@@ -823,12 +823,33 @@ public abstract class AbstractRomHandler implements RomHandler {
                     index++;
                     // Check if the pokemon to be changed is in the banned list, so dont change it
                     if (banned.contains(enc.pokemon)) {
+                        if (enc.maxLevel == 0 || enc.maxLevel == enc.level){
+                            enc.maxLevel = (int) (enc.level * 1.25);
+
+                            if (enc.maxLevel > 100)
+                                enc.maxLevel = 100;
+
+                            if (enc.level == enc.maxLevel)
+                                enc.maxLevel = enc.level + 5;
+                        }
+
                         continue;
                     }
 
                     // Check if the pokemon has been in this pool yet. Don't change it if it hasnt been
                     if (!doubles.contains(enc.pokemon.number)) {
                         doubles.add(enc.pokemon.number);
+
+                        if (enc.maxLevel == 0 || enc.maxLevel == enc.level){
+                            enc.maxLevel = (int) (enc.level * 1.25);
+
+                            if (enc.maxLevel > 100)
+                                enc.maxLevel = 100;
+
+                            if (enc.level == enc.maxLevel)
+                                enc.maxLevel = enc.level + 5;
+                        }
+
                         continue;
                     }
 
@@ -994,7 +1015,18 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                                         if (maxLevel > 100)
                                             maxLevel = 100;
+
+                                        if (minLevel == maxLevel)
+                                            maxLevel = minLevel + 5;
                                     }
+                                } else if (maxLevel == 0 || maxLevel == minLevel){
+                                    maxLevel = (int) (minLevel * 1.25);
+
+                                    if (maxLevel > 100)
+                                        maxLevel = 100;
+
+                                    if (minLevel == maxLevel)
+                                        maxLevel = minLevel + 5;
                                 }
 
                                 newenc.level = minLevel;
