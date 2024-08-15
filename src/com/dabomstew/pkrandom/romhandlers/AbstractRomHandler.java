@@ -869,13 +869,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                             if (primaryTypedList.get(type) != null && !primaryTypedList.get(type).isEmpty()) {
                                 // Set flags to reset and no longer need to remove pokemons from lists
                                 resetList = false;
-                                allHasBeenAdded = true;
                                 break;
                             }
                         }
 
                         // Reset the list in the same way as above
                         if (resetList) {
+                            allHasBeenAdded = true;
                             primaryTypedList = new HashMap<>();
                             secondaryTypedList = new HashMap<>();
 
@@ -1020,6 +1020,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                                             maxLevel = minLevel + 5;
                                     }
                                 } else if (maxLevel == 0 || maxLevel == minLevel){
+                                    if (minLevel < 5)
+                                        minLevel = 5;
+
                                     maxLevel = (int) (minLevel * 1.25);
 
                                     if (maxLevel > 100)
